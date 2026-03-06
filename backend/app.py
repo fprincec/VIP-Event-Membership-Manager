@@ -127,5 +127,93 @@ def delete_member(member_id):
 
     return jsonify({"message": "Member deleted"}) #2. PT.2          END
 
+# 3. From lines 131 to 216, I asked chatGPT how to write Flask endpoints for CRUD operations on an "event" resource that will interact with a MySQL database using the get_connection function.
+@app.get("/events") # 3.       START
+def get_events():
+    conn = get_connection()
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT * FROM event")
+        events = cur.fetchall()
+
+    return jsonify(events)
+
+
+@app.get("/events/<int:event_id>")
+def get_event(event_id):
+    conn = get_connection()
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT * FROM event WHERE id = %s", (event_id,))
+        event = cur.fetchone()
+
+    if not event:
+        return jsonify({"error": "Event not found"}), 404
+
+    return jsonify(event)
+
+
+@app.post("/events")
+def create_event():
+    data = request.json
+
+    name = data.get("name")
+    capacity = data.get("capacity")
+    level = data.get("level")
+    date = data.get("date")
+
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO event (name, capacity, level, date)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (name, capacity, level, date),
+            )
+
+            event_id = cur.lastrowid
+
+        return jsonify({"message": "Event created", "id": event_id}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@app.put("/events/<int:event_id>")
+def update_event(event_id):
+    data = request.json
+
+    name = data.get("name")
+    capacity = data.get("capacity")
+    level = data.get("level")
+    date = data.get("date")
+
+    conn = get_connection()
+
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE event
+            SET name=%s, capacity=%s, level=%s, date=%s
+            WHERE id=%s
+            """,
+            (name, capacity, level, date, event_id),
+        )
+
+    return jsonify({"message": "Event updated"})
+
+
+@app.delete("/events/<int:event_id>")
+def delete_event(event_id):
+    conn = get_connection()
+
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM event WHERE id=%s", (event_id,))
+
+    return jsonify({"message": "Event deleted"}) # 3.           END
+
 if __name__ == "__main__": #1. PT 2 START
     app.run(debug=True) # 1.   PT.2   END.    
