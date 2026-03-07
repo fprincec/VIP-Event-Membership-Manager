@@ -1,6 +1,6 @@
-#1. from lines 3 to 43 and 211 to 212, I asked chatGPT how to write a flask application that connects to a MySQL database, provides a health check endpoint, a database test endpoint, and an endpoint to initialize the database using a schema.sql file. 
+# 1. from lines 3 to 43 and 315 to 316, I asked chatGPT how to write a flask application that connects to a MySQL database, provides a health check endpoint, a database test endpoint, and an endpoint to initialize the database using a schema.sql file. 
 
-from flask import Flask, jsonify #1. PT.1               START # This line imports the Flask class to create the application and jsonify to return JSON responses.
+from flask import Flask, jsonify # This line imports the Flask class to create the application and jsonify to return JSON responses.
 from flask_cors import CORS # This line imports CORS to enable Cross-Origin Resourse Sharing, allowing the frontend to commmunicate with the backend without CORS issues.
 from db import get_connection # This line imports the get_connection funcion from the db module, which is responsible for esablishing a connection to the MySQL database.
 
@@ -40,10 +40,10 @@ def init_db(): # This is a function that runs when the /init-db endpoint is call
         return jsonify({"message": "Database initialized"}) # This line returns a JSON response indicating the database was successfully initialized
 
     except Exception as e: # This line catches any errors that occur during execution
-        return jsonify({"error": str(e)}), 500 #1. PT.1             END This line returns the error message in JSON format with HTTP status code 500
+        return jsonify({"error": str(e)}), 500 # This line returns the error message in JSON format with HTTP status code 500
 
-#2. From lines 46 to 125, I asked chatGPT how to write Flask endpoints for CRUD operations on a "member" resource that will interact with a MySQL database using the get_connection function. 
-from flask import request #2. START.           This line imports the request object from Flask so the server can access data sent by the client
+# 2. From lines 46 to 125, I asked chatGPT how to write Flask endpoints for CRUD operations on a "member" resource that will interact with a MySQL database using the get_connection function. 
+from flask import request # This line imports the request object from Flask so the server can access data sent by the client
 
 @app.get("/members") # This line creates a GET endpoint at /members that will return all members
 def get_members(): # This line defines the function that runs when the /members endpoint is accessed
@@ -122,10 +122,10 @@ def delete_member(member_id): # This line defines the function that runs when a 
     with conn.cursor() as cur: # This line creates a cursor object used to execute SQL queries
         cur.execute("DELETE FROM member WHERE id=%s", (member_id,)) # This line executes a SQL query that deletes the member whose ID matches member_id
 
-    return jsonify({"message": "Member deleted"}) #2.          END This line returns a JSON response confirming that the member was successfully deleted
+    return jsonify({"message": "Member deleted"}) # This line returns a JSON response confirming that the member was successfully deleted
 
 # 3. From lines 128 to 209, I asked chatGPT how to write Flask endpoints for CRUD operations on an "event" resource that will interact with a MySQL database using the get_connection function.
-@app.get("/events") # 3.       START This line creates a GET endpoint at /events used to retrieve all events from the database
+@app.get("/events") # This line creates a GET endpoint at /events used to retrieve all events from the database
 def get_events(): # This line defines the function that runs when a request is made to the /events endpoint
     conn = get_connection() # This line establishes a connection to the database
 
@@ -206,7 +206,111 @@ def delete_event(event_id): # This line defines the function that runs when a DE
     with conn.cursor() as cur: # This line creates a cursor object used to execute SQL queries
         cur.execute("DELETE FROM event WHERE id=%s", (event_id,)) # This line executes a SQL query that deletes the event whose ID matches event_id
 
-    return jsonify({"message": "Event deleted"}) # 3.           END This line returns a JSON response confirming that the event was successfully deleted
+    return jsonify({"message": "Event deleted"}) # This line returns a JSON response confirming that the event was successfully deleted
 
-if __name__ == "__main__": #1. PT 2 START.        This line checks if the script is being run directly rather than imported as a module
-    app.run(debug=True) # 1.   PT.2   END.     This line starts the Flask development server and enables debug mode for easier troubleshooting
+#4. From lines 212 to 313, I asked ChatGPT how to implement registration logic that enforces membership level restrictions, prevents duplicate registrations, and checks event capacity before allowing a member to register.
+@app.get("/registrations") # This line creates a GET endpoint at /registrations used to retrieve all registrations from the database      
+def get_registrations(): # This line defines the function that runs when the /registrations endpoint is accessed
+    conn = get_connection()# This line establishes a connection to the database
+
+    with conn.cursor() as cur: # This line creates a cursor object used to execute SQL queries
+        cur.execute("SELECT * FROM registration") # This line executes a SQL query to retrieve all records from the registration table
+        registrations = cur.fetchall() # This line retrieves all rows returned by the query and stores them in the variable registrations
+
+    return jsonify(registrations) # This line converts the registrations data into JSON format and sends it back to the client
+
+@app.get("/events/<int:event_id>/members") # This line creates a GET endpoint used to retrieve all members registered for a specific event
+def get_event_members(event_id): # This line defines the function that runs when the endpoint is accessed and receives event_id from the URL
+    conn = get_connection() # This line establishes a connection to the database
+
+    with conn.cursor() as cur: # This line creates a cursor object used to execute SQL queries
+        cur.execute( # This line executes a SQL query that retrieves all members registered for the specified event
+            """
+            SELECT m.*
+            FROM registration r
+            JOIN member m ON r.member_id = m.id
+            WHERE r.event_id = %s
+            """, # This line defines a SQL JOIN query that connects the registration table with the member table
+            (event_id,) # This line provides the event_id value used in the WHERE condition
+        )
+        members = cur.fetchall() # This line retrieves all rows returned from the query and stores them in the variable members
+
+    return jsonify(members) # This line converts the members data into JSON format and returns it to the client
+
+@app.post("/registrations") # This line creates a POST endpoint at /registrations used to register a member for an event
+def create_registration(): # This line defines the function that runs when a POST request is sent to the /registrations endpoint
+    data = request.json # This line retrieves the JSON data sent in the request body and stores it in the variable data
+
+    event_id = data.get("event_id") # This line extracts the "event_id" value from the request data
+    member_id = data.get("member_id") # This line extracts the "member_id" value from the request data
+
+    conn = get_connection() # This line establishes a connection to the database
+
+    try: # This line begins a try block to handle possible errors during the registration process
+        with conn.cursor() as cur: # This line creates a cursor object used to execute SQL queries
+            cur.execute("SELECT * FROM event WHERE id = %s", (event_id,)) # This line executes a SQL query to check if the specified event exists
+            event = cur.fetchone() # This line retrieves the event record returned from the query
+            if not event: # This line checks whether the event does not exist
+                return jsonify({"error": "Event not found"}), 404 # This line returns a JSON error message with HTTP status code 404 if the event does not exist
+
+            cur.execute("SELECT * FROM member WHERE id = %s", (member_id,)) # This line executes a SQL query to check if the specified member exists
+            member = cur.fetchone() # This line retrieves the member record returned from the query
+            if not member: # This line checks whether the member does not exist
+                return jsonify({"error": "Member not found"}), 404 # This line returns a JSON error message with HTTP status code 404 if the member does not exist
+
+            cur.execute( # This line executes a SQL query to check whether this member is already registered for the event
+                """
+                SELECT * FROM registration
+                WHERE event_id = %s AND member_id = %s
+                """,
+                (event_id, member_id) # This line supplies the event_id and member_id used to check for an existing registration
+            )
+            existing_registration = cur.fetchone() # This line retrieves the existing registration if one is found
+
+            if existing_registration: # This line checks if the member is already registered for the event
+                return jsonify({"error": "Member is already registered for this event"}), 400 # This line returns a JSON error message if a duplicate registration is detected
+
+            cur.execute( # This line executes a SQL query to count how many members are currently registered for the event
+                "SELECT COUNT(*) AS count FROM registration WHERE event_id = %s",
+                (event_id,) # This line supplies the event_id used to count registrations for that event
+            )
+            registration_count = cur.fetchone()["count"] # This line retrieves the registration count value from the query result
+
+            if registration_count >= event["capacity"]:  # This line checks whether the number of current registrations has reached or exceeded the event's capacity
+                return jsonify({"error": "Event is already at full capacity"}), 400  # This line returns a JSON error message if the event cannot accept more registrations
+
+            member_level = member["level"]  # This line retrieves the membership level of the member
+            event_level = event["level"]  # This line retrieves the required membership level for the event
+
+            if event_level == "Gold" and member_level != "Gold":  # This line checks if the event requires Gold membership but the member is not Gold
+                return jsonify({"error": "Only Gold members can register for Gold events"}), 400  # This line returns an error if the member does not meet the Gold requirement
+
+            if event_level == "Silver" and member_level not in ["Silver", "Gold"]:  # This line checks if the event requires Silver-level access but the member is not Silver or Gold
+                return jsonify({"error": "Only Silver or Gold members can register for Silver events"}), 400  # This line returns an error if the member does not meet the Silver requirement
+
+            cur.execute(  # This line executes a SQL command to insert a new registration record into the registration table
+                """
+                INSERT INTO registration (event_id, member_id)
+                VALUES (%s, %s)
+                """,  # This line defines the SQL insert statement for the registration table
+                (event_id, member_id)  # This line supplies the event_id and member_id values for the new registration
+            )
+
+            registration_id = cur.lastrowid  # This line retrieves the ID of the newly inserted registration record
+
+        return jsonify({"message": "Registration created", "id": registration_id}), 201  # This line returns a JSON response confirming the registration and includes the new registration ID with HTTP status code 201
+
+    except Exception as e:  # This line catches any error that occurs during the registration process
+        return jsonify({"error": str(e)}), 400  # This line returns the error message in JSON format with HTTP status code 400
+
+@app.delete("/registrations/<int:registration_id>")  # This line creates a DELETE endpoint used to remove a registration using its ID
+def delete_registration(registration_id):  # This line defines the function that runs when a DELETE request is sent to this endpoint and receives registration_id from the URL
+    conn = get_connection()  # This line establishes a connection to the database
+
+    with conn.cursor() as cur:  # This line creates a cursor object used to execute SQL queries
+        cur.execute("DELETE FROM registration WHERE id = %s", (registration_id,))  # This line executes a SQL query that deletes the registration whose ID matches registration_id
+
+    return jsonify({"message": "Registration deleted"}) # This line returns a JSON response confirming that the registration was successfully deleted 
+
+if __name__ == "__main__": # This line checks if the script is being run directly rather than imported as a module
+    app.run(debug=True) # This line starts the Flask development server and enables debug mode for easier troubleshooting
