@@ -1,0 +1,41 @@
+<!-- From lines 2 to 41, I asked ChatGPT how to create an EJS dashboard page that displays counts from my Flask API data. -->
+
+<%- include("layout/header") %> <!-- This line inserts the reusable header and navigation onto the page. -->
+
+<section class="card"> <!-- This line creates a card section for the dashboard title. -->
+    <h2>Dashboard</h2> <!-- This line displays the dashboard page heading. -->
+    <p>This page gives a quick overview of the current VIP organization data.</p> <!-- This line explains the purpose of the page. -->
+</section> <!-- This line ends the dashboard title card. -->
+
+<% if (typeof error !== "undefined") { %> <!-- This line checks if an error message was sent from server.js. -->
+    <div class="error-message"> <!-- This line creates a styled error message box. -->
+        <%= error %> <!-- This line displays the error message from the server. -->
+    </div> <!-- This line ends the error message box. -->
+<% } %> <!-- This line ends the error check. -->
+
+<section class="dashboard-grid"> <!-- This line creates a grid section for the dashboard summary cards. -->
+    <div class="summary-card"> <!-- This line creates the first summary card. -->
+        <h3>Members</h3> <!-- This line labels the card as Members. -->
+        <p class="big-number"><%= members.length %></p> <!-- This line displays the number of members loaded from the backend. -->
+        <a href="/members">View Members</a> <!-- This line links to the members page. -->
+    </div> <!-- This line ends the members summary card. -->
+
+    <div class="summary-card"> <!-- This line creates the second summary card. -->
+        <h3>Events</h3> <!-- This line labels the card as Events. -->
+        <p class="big-number"><%= events.length %></p> <!-- This line displays the number of events loaded from the backend. -->
+        <a href="/events">View Events</a> <!-- This line links to the events page. -->
+    </div> <!-- This line ends the events summary card. -->
+
+    <div class="summary-card"> <!-- This line creates the third summary card. -->
+        <h3>Registrations</h3> <!-- This line labels the card as Registrations. -->
+        <p class="big-number"><%= registrations.length %></p> <!-- This line displays the number of registrations loaded from the backend. -->
+        <a href="/registrations">View Registrations</a> <!-- This line links to the registrations page. -->
+    </div> <!-- This line ends the registrations summary card. -->
+</section> <!-- This line ends the dashboard grid. -->
+
+<section class="card"> <!-- This line creates another card section for project notes. -->
+    <h2>Sprint 2 Goal</h2> <!-- This line displays a heading for the Sprint 2 goal. -->
+    <p>The goal of Sprint 2 is to provide a JavaScript and EJS user interface that communicates with the Flask REST API.</p> <!-- This line explains the Sprint 2 frontend goal. -->
+</section> <!-- This line ends the project notes card. -->
+
+<%- include("layout/footer") %> <!-- This line inserts the reusable footer onto the page. -->

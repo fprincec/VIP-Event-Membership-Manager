@@ -1,0 +1,108 @@
+/* From lines 2 to 119, I asked ChatGPT how to style my Sprint 2 EJS frontend pages with a clean layout. */
+
+* { /* This selector applies these settings to every element on the page. */
+    box-sizing: border-box; /* This line makes spacing and sizing easier to control. */
+    margin: 0; /* This line removes default browser margin. */
+    padding: 0; /* This line removes default browser padding. */
+}
+
+body { /* This selector styles the main body of the page. */
+    font-family: Arial, Helvetica, sans-serif; /* This line sets the main font for the website. */
+    background-color: #f4f6f8; /* This line sets a light background color for the page. */
+    color: #222; /* This line sets the main text color. */
+    line-height: 1.6; /* This line increases spacing between lines of text. */
+}
+
+.site-header { /* This selector styles the top page header. */
+    background-color: #0f4c5c; /* This line gives the header a dark teal background. */
+    color: white; /* This line makes the header text white. */
+    text-align: center; /* This line centers the header text. */
+    padding: 30px 20px; /* This line adds space inside the header. */
+}
+
+.site-header h1 { /* This selector styles the main heading inside the header. */
+    margin-bottom: 8px; /* This line adds space under the main heading. */
+}
+
+.navbar { /* This selector styles the navigation bar. */
+    display: flex; /* This line places the navigation links in a row. */
+    justify-content: center; /* This line centers the links horizontally. */
+    gap: 20px; /* This line adds space between navigation links. */
+    background-color: #12343b; /* This line gives the navigation bar a dark background. */
+    padding: 12px; /* This line adds space inside the navigation bar. */
+}
+
+.navbar a { /* This selector styles the navigation links. */
+    color: white; /* This line makes the links white. */
+    text-decoration: none; /* This line removes the underline from links. */
+    font-weight: bold; /* This line makes the links bold. */
+}
+
+.navbar a:hover { /* This selector styles navigation links when the mouse is over them. */
+    text-decoration: underline; /* This line adds an underline when hovering over a link. */
+}
+
+.container { /* This selector styles the main content area. */
+    max-width: 1100px; /* This line prevents the content from becoming too wide. */
+    margin: 25px auto; /* This line centers the content and adds vertical spacing. */
+    padding: 0 20px; /* This line adds spacing on the left and right. */
+}
+
+.card { /* This selector styles reusable card sections. */
+    background-color: white; /* This line gives each card a white background. */
+    border-radius: 8px; /* This line rounds the card corners. */
+    padding: 20px; /* This line adds space inside each card. */
+    margin-bottom: 20px; /* This line adds space below each card. */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* This line adds a soft shadow behind cards. */
+}
+
+.card h2 { /* This selector styles h2 headings inside cards. */
+    margin-bottom: 10px; /* This line adds spacing below card headings. */
+    color: #0f4c5c; /* This line makes card headings dark teal. */
+}
+
+.dashboard-grid { /* This selector styles the dashboard card grid. */
+    display: grid; /* This line creates a grid layout. */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* This line makes the grid responsive. */
+    gap: 20px; /* This line adds space between grid cards. */
+    margin-bottom: 20px; /* This line adds spacing below the grid. */
+}
+
+.summary-card { /* This selector styles each dashboard summary card. */
+    background-color: white; /* This line gives each summary card a white background. */
+    border-radius: 8px; /* This line rounds the card corners. */
+    padding: 20px; /* This line adds space inside the summary card. */
+    text-align: center; /* This line centers the text inside the summary card. */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* This line adds a soft shadow behind the card. */
+}
+
+.summary-card h3 { /* This selector styles the summary card headings. */
+    color: #0f4c5c; /* This line makes the heading dark teal. */
+    margin-bottom: 10px; /* This line adds spacing below the heading. */
+}
+
+.big-number { /* This selector styles the large dashboard numbers. */
+    font-size: 42px; /* This line makes the number large. */
+    font-weight: bold; /* This line makes the number bold. */
+    margin-bottom: 10px; /* This line adds spacing below the number. */
+}
+
+.summary-card a { /* This selector styles links inside summary cards. */
+    color: #0f4c5c; /* This line sets the link color. */
+    font-weight: bold; /* This line makes the link bold. */
+}
+
+.error-message { /* This selector styles backend connection error messages. */
+    background-color: #ffe1e1; /* This line gives the error box a light red background. */
+    color: #8a0000; /* This line makes the error text dark red. */
+    border: 1px solid #ff9f9f; /* This line adds a red border around the error box. */
+    padding: 12px; /* This line adds space inside the error box. */
+    border-radius: 8px; /* This line rounds the error box corners. */
+    margin-bottom: 20px; /* This line adds spacing below the error box. */
+}
+
+.site-footer { /* This selector styles the footer at the bottom of the page. */
+    text-align: center; /* This line centers the footer text. */
+    padding: 20px; /* This line adds space inside the footer. */
+    color: #555; /* This line makes the footer text gray. */
+}
