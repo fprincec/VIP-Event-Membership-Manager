@@ -106,3 +106,83 @@ body { /* This selector styles the main body of the page. */
     padding: 20px; /* This line adds space inside the footer. */
     color: #555; /* This line makes the footer text gray. */
 }
+
+/* From lines 110 to 188, I asked ChatGPT how to style forms, tables, and buttons for my Sprint 2 member management page. */
+.form-grid { /* This selector styles forms that use a grid layout. */
+    display: grid; /* This line turns the form into a grid. */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* This line makes the form responsive on different screen sizes. */
+    gap: 15px; /* This line adds space between form fields. */
+}
+
+.form-group { /* This selector styles each form field group. */
+    display: flex; /* This line lets the label and input stack neatly. */
+    flex-direction: column; /* This line places the label above the input. */
+}
+
+.full-width { /* This selector is used for fields that should stretch across the full form. */
+    grid-column: 1 / -1; /* This line makes the element span all grid columns. */
+}
+
+label { /* This selector styles form labels. */
+    font-weight: bold; /* This line makes labels bold. */
+    margin-bottom: 5px; /* This line adds spacing under labels. */
+    color: #0f4c5c; /* This line makes labels dark teal. */
+}
+
+input, select, textarea { /* This selector styles form inputs, dropdowns, and text areas. */
+    padding: 9px; /* This line adds spacing inside the fields. */
+    border: 1px solid #ccc; /* This line adds a light border around form fields. */
+    border-radius: 5px; /* This line rounds the corners of form fields. */
+    font-size: 14px; /* This line sets the font size inside form fields. */
+}
+
+.button { /* This selector styles regular buttons. */
+    background-color: #0f4c5c; /* This line gives the button a dark teal background. */
+    color: white; /* This line makes the button text white. */
+    border: none; /* This line removes the default button border. */
+    border-radius: 5px; /* This line rounds the button corners. */
+    padding: 10px 14px; /* This line adds spacing inside the button. */
+    cursor: pointer; /* This line changes the mouse cursor when hovering over the button. */
+    font-weight: bold; /* This line makes the button text bold. */
+}
+
+.button:hover { /* This selector styles regular buttons when the mouse is over them. */
+    background-color: #12343b; /* This line darkens the button on hover. */
+}
+
+.small-button { /* This selector styles smaller buttons inside tables. */
+    padding: 7px 10px; /* This line makes table buttons smaller than normal buttons. */
+    font-size: 13px; /* This line makes the table button text smaller. */
+}
+
+.danger-button { /* This selector styles delete buttons. */
+    background-color: #b00020; /* This line gives delete buttons a red background. */
+}
+
+.danger-button:hover { /* This selector styles delete buttons when the mouse is over them. */
+    background-color: #7a0016; /* This line darkens the delete button on hover. */
+}
+
+.table-wrapper { /* This selector styles the table container. */
+    overflow-x: auto; /* This line allows the table to scroll sideways on smaller screens. */
+}
+
+table { /* This selector styles all tables. */
+    width: 100%; /* This line makes the table fill the card width. */
+    border-collapse: collapse; /* This line removes extra spacing between table borders. */
+}
+
+th, td { /* This selector styles table headers and table cells. */
+    border-bottom: 1px solid #ddd; /* This line adds a light line under each row. */
+    padding: 10px; /* This line adds spacing inside table cells. */
+    text-align: left; /* This line aligns table text to the left. */
+}
+
+th { /* This selector styles table header cells. */
+    background-color: #0f4c5c; /* This line gives the table header a dark teal background. */
+    color: white; /* This line makes the table header text white. */
+}
+
+td input, td select { /* This selector styles inputs and dropdowns inside table cells. */
+    width: 100%; /* This line makes table form fields fill their cell. */
+}

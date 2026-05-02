@@ -1,4 +1,4 @@
-// From lines 2 to 69, I asked ChatGPT how to create an Express and EJS frontend server that connects to my Flask REST API.
+// From lines 2 to 46 and 94 to 121, I asked ChatGPT how to create an Express and EJS frontend server that connects to my Flask REST API.
 
 const express = require("express"); // This line imports Express, which is used to create the frontend web server.
 const path = require("path"); // This line imports the path module, which helps build safe file paths.
@@ -42,6 +42,52 @@ app.get("/members", async (req, res) => { // This line creates a GET route for t
         res.render("members", { members: response.data }); // This line renders members.ejs and sends the members data to the page.
     } catch (error) { // This line catches errors if the members cannot be loaded.
         res.render("members", { members: [], error: "Could not load members from the backend." }); // This line renders the page with an error message.
+    }
+});
+
+// From lines 50 - 92, I asked ChatGPT how to create Express routes that let my EJS frontend create, update, and delete members by communicating with my Flask REST API.
+app.post("/members/create", async (req, res) => { // This line creates a POST route that runs when the user submits the add member form.
+    try { // This line starts a try block to handle possible errors.
+        const memberData = { // This line creates an object containing the member data from the form.
+            name: req.body.name, // This line gets the member name from the submitted form.
+            details: req.body.details, // This line gets the member details from the submitted form.
+            title: req.body.title, // This line gets the member title from the submitted form.
+            level: req.body.level // This line gets the member level from the submitted form.
+        };
+
+        await axios.post(`${API_BASE_URL}/members`, memberData); // This line sends the new member data to the Flask backend.
+        res.redirect("/members"); // This line sends the user back to the members page after the member is created.
+    } catch (error) { // This line catches any error that happens during the API request.
+        res.redirect("/members"); // This line sends the user back to the members page if something goes wrong.
+    }
+});
+
+app.post("/members/update", async (req, res) => { // This line creates a POST route that runs when the user submits an update member form.
+    try { // This line starts a try block to handle possible errors.
+        const memberId = req.body.member_id; // This line gets the hidden member id from the form so the backend knows which member to update.
+
+        const memberData = { // This line creates an object containing the updated member data.
+            name: req.body.name, // This line gets the updated member name from the form.
+            details: req.body.details, // This line gets the updated member details from the form.
+            title: req.body.title, // This line gets the updated member title from the form.
+            level: req.body.level // This line gets the updated member level from the form.
+        };
+
+        await axios.put(`${API_BASE_URL}/members/${memberId}`, memberData); // This line sends the updated member data to the Flask backend.
+        res.redirect("/members"); // This line sends the user back to the members page after updating.
+    } catch (error) { // This line catches any error that happens during the update request.
+        res.redirect("/members"); // This line sends the user back to the members page if something goes wrong.
+    }
+});
+
+app.post("/members/delete", async (req, res) => { // This line creates a POST route that runs when the user clicks a delete button.
+    try { // This line starts a try block to handle possible errors.
+        const memberId = req.body.member_id; // This line gets the hidden member id from the form.
+
+        await axios.delete(`${API_BASE_URL}/members/${memberId}`); // This line sends a delete request to the Flask backend for the selected member.
+        res.redirect("/members"); // This line sends the user back to the members page after deleting.
+    } catch (error) { // This line catches any error that happens during the delete request.
+        res.redirect("/members"); // This line sends the user back to the members page if something goes wrong.
     }
 });
 

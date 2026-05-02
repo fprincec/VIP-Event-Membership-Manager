@@ -1,0 +1,112 @@
+<!-- From lines below, I asked ChatGPT how to create an EJS page that lets users view, add, update, and delete VIP members without showing database primary key IDs. -->
+
+<%- include("layout/header") %> <!-- This line inserts the reusable header and navigation onto the page. -->
+
+<section class="card"> <!-- This line creates a card section for the members page heading. -->
+    <h2>Members</h2> <!-- This line displays the members page title. -->
+    <p>Use this page to manage VIP organization members.</p> <!-- This line explains what the page is used for. -->
+</section> <!-- This line ends the heading card. -->
+
+<% if (typeof error !== "undefined") { %> <!-- This line checks if an error message was sent from server.js. -->
+    <div class="error-message"> <!-- This line creates a styled error message box. -->
+        <%= error %> <!-- This line displays the error message. -->
+    </div> <!-- This line ends the error message box. -->
+<% } %> <!-- This line ends the error check. -->
+
+<section class="card"> <!-- This line creates a card section for adding a new member. -->
+    <h2>Add New Member</h2> <!-- This line displays the form title. -->
+
+    <form action="/members/create" method="POST" class="form-grid"> <!-- This line creates a form that sends new member data to the Express route. -->
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="name">Name</label> <!-- This line labels the name input. -->
+            <input type="text" id="name" name="name" required> <!-- This line creates a required text box for the member name. -->
+        </div> <!-- This line ends the name field group. -->
+
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="title">Title</label> <!-- This line labels the title input. -->
+            <input type="text" id="title" name="title" required> <!-- This line creates a required text box for the member title. -->
+        </div> <!-- This line ends the title field group. -->
+
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="level">Membership Level</label> <!-- This line labels the level dropdown. -->
+            <select id="level" name="level" required> <!-- This line creates a dropdown so users do not have to type the level manually. -->
+                <option value="Bronze">Bronze</option> <!-- This line creates a Bronze option. -->
+                <option value="Silver">Silver</option> <!-- This line creates a Silver option. -->
+                <option value="Gold">Gold</option> <!-- This line creates a Gold option. -->
+            </select> <!-- This line ends the level dropdown. -->
+        </div> <!-- This line ends the level field group. -->
+
+        <div class="form-group full-width"> <!-- This line creates a full width form field group. -->
+            <label for="details">Details</label> <!-- This line labels the details input. -->
+            <textarea id="details" name="details" rows="3" required></textarea> <!-- This line creates a required text area for member details. -->
+        </div> <!-- This line ends the details field group. -->
+
+        <button type="submit" class="button">Add Member</button> <!-- This line creates the submit button for adding a member. -->
+    </form> <!-- This line ends the add member form. -->
+</section> <!-- This line ends the add member card. -->
+
+<section class="card"> <!-- This line creates a card section for the current members list. -->
+    <h2>Current Members</h2> <!-- This line displays the current members heading. -->
+
+    <% if (members.length === 0) { %> <!-- This line checks if there are no members to display. -->
+        <p>No members found.</p> <!-- This line displays a message if the members list is empty. -->
+    <% } else { %> <!-- This line runs if there are members to display. -->
+        <div class="table-wrapper"> <!-- This line creates a wrapper around the table for styling. -->
+            <table> <!-- This line starts the members table. -->
+                <thead> <!-- This line starts the table header area. -->
+                    <tr> <!-- This line starts the header row. -->
+                        <th>Name</th> <!-- This line creates a column for member names. -->
+                        <th>Title</th> <!-- This line creates a column for member titles. -->
+                        <th>Level</th> <!-- This line creates a column for membership levels. -->
+                        <th>Details</th> <!-- This line creates a column for member details. -->
+                        <th>Update</th> <!-- This line creates a column for update forms. -->
+                        <th>Delete</th> <!-- This line creates a column for delete buttons. -->
+                    </tr> <!-- This line ends the header row. -->
+                </thead> <!-- This line ends the table header area. -->
+
+                <tbody> <!-- This line starts the table body area. -->
+                    <% members.forEach(member => { %> <!-- This line loops through each member from the backend. -->
+                        <tr> <!-- This line starts a table row for one member. -->
+                            <form action="/members/update" method="POST"> <!-- This line creates an update form for this member. -->
+                                <input type="hidden" name="member_id" value="<%= member.id %>"> <!-- This hidden input stores the database id without showing it on the page. -->
+
+                                <td> <!-- This line starts the name table cell. -->
+                                    <input type="text" name="name" value="<%= member.name %>" required> <!-- This line allows the user to edit the member name. -->
+                                </td> <!-- This line ends the name table cell. -->
+
+                                <td> <!-- This line starts the title table cell. -->
+                                    <input type="text" name="title" value="<%= member.title %>" required> <!-- This line allows the user to edit the member title. -->
+                                </td> <!-- This line ends the title table cell. -->
+
+                                <td> <!-- This line starts the level table cell. -->
+                                    <select name="level" required> <!-- This line creates a dropdown for editing the membership level. -->
+                                        <option value="Bronze" <%= member.level === "Bronze" ? "selected" : "" %>>Bronze</option> <!-- This line selects Bronze if the member is Bronze. -->
+                                        <option value="Silver" <%= member.level === "Silver" ? "selected" : "" %>>Silver</option> <!-- This line selects Silver if the member is Silver. -->
+                                        <option value="Gold" <%= member.level === "Gold" ? "selected" : "" %>>Gold</option> <!-- This line selects Gold if the member is Gold. -->
+                                    </select> <!-- This line ends the level dropdown. -->
+                                </td> <!-- This line ends the level table cell. -->
+
+                                <td> <!-- This line starts the details table cell. -->
+                                    <input type="text" name="details" value="<%= member.details %>" required> <!-- This line allows the user to edit the member details. -->
+                                </td> <!-- This line ends the details table cell. -->
+
+                                <td> <!-- This line starts the update table cell. -->
+                                    <button type="submit" class="button small-button">Update</button> <!-- This line creates the update button for this member. -->
+                                </td> <!-- This line ends the update table cell. -->
+                            </form> <!-- This line ends the update form. -->
+
+                            <td> <!-- This line starts the delete table cell. -->
+                                <form action="/members/delete" method="POST"> <!-- This line creates a delete form for this member. -->
+                                    <input type="hidden" name="member_id" value="<%= member.id %>"> <!-- This hidden input stores the database id without showing it on the page. -->
+                                    <button type="submit" class="button danger-button small-button">Delete</button> <!-- This line creates the delete button for this member. -->
+                                </form> <!-- This line ends the delete form. -->
+                            </td> <!-- This line ends the delete table cell. -->
+                        </tr> <!-- This line ends the member row. -->
+                    <% }) %> <!-- This line ends the members loop. -->
+                </tbody> <!-- This line ends the table body area. -->
+            </table> <!-- This line ends the members table. -->
+        </div> <!-- This line ends the table wrapper. -->
+    <% } %> <!-- This line ends the members list check. -->
+</section> <!-- This line ends the current members card. -->
+
+<%- include("layout/footer") %> <!-- This line inserts the reusable footer onto the page. -->
