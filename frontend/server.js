@@ -1,4 +1,4 @@
-// From lines 2 to 46 and 94 to 121, I asked ChatGPT how to create an Express and EJS frontend server that connects to my Flask REST API.
+// From lines 2 to 60, 94 to 101, and 171 to 189, I asked ChatGPT how to create an Express and EJS frontend server that connects to my Flask REST API.
 
 const express = require("express"); // This line imports Express, which is used to create the frontend web server.
 const path = require("path"); // This line imports the path module, which helps build safe file paths.
@@ -7,6 +7,20 @@ const axios = require("axios"); // This line imports Axios, which is used to sen
 const app = express(); // This line creates an Express application and stores it in the variable app.
 const PORT = 3000; // This line sets the port number where the frontend server will run.
 const API_BASE_URL = "http://127.0.0.1:5000"; // This line stores the base URL for the Flask backend API.
+
+function formatDateForInput(dateValue) { // This function converts backend date values into the format required by HTML date inputs.
+    if (!dateValue) { // This line checks if the date value is empty or missing.
+        return ""; // This line returns an empty string if there is no date.
+    }
+
+    const date = new Date(dateValue); // This line creates a JavaScript Date object from the backend date value.
+
+    if (isNaN(date.getTime())) { // This line checks if JavaScript could not understand the date.
+        return dateValue.toString().substring(0, 10); // This line uses the first 10 characters as a backup format.
+    }
+
+    return date.toISOString().substring(0, 10); // This line returns the date in YYYY-MM-DD format for the HTML date input.
+}
 
 app.set("view engine", "ejs"); // This line tells Express to use EJS as the template engine.
 app.set("views", path.join(__dirname, "views")); // This line tells Express where the EJS view files are located.
@@ -45,7 +59,7 @@ app.get("/members", async (req, res) => { // This line creates a GET route for t
     }
 });
 
-// From lines 50 - 92, I asked ChatGPT how to create Express routes that let my EJS frontend create, update, and delete members by communicating with my Flask REST API.
+// From lines 62 - 123, I asked ChatGPT how to create Express routes that let my EJS frontend create, update, and delete members by communicating with my Flask REST API.
 app.post("/members/create", async (req, res) => { // This line creates a POST route that runs when the user submits the add member form.
     try { // This line starts a try block to handle possible errors.
         const memberData = { // This line creates an object containing the member data from the form.
@@ -94,9 +108,63 @@ app.post("/members/delete", async (req, res) => { // This line creates a POST ro
 app.get("/events", async (req, res) => { // This line creates a GET route for the events page.
     try { // This line starts a try block to handle possible API errors.
         const response = await axios.get(`${API_BASE_URL}/events`); // This line requests all events from the backend.
-        res.render("events", { events: response.data }); // This line renders events.ejs and sends the events data to the page.
+
+        const events = response.data.map(event => { // This line loops through each event and prepares the date for the form.
+            return { // This line returns a cleaned-up event object.
+                ...event, // This line keeps all the original event data.
+                formattedDate: formatDateForInput(event.date) // This line adds a properly formatted date value for the HTML date input.
+            };
+        });
+
+        res.render("events", { events: events }); // This line renders events.ejs and sends the cleaned event data to the page.
     } catch (error) { // This line catches errors if the events cannot be loaded.
         res.render("events", { events: [], error: "Could not load events from the backend." }); // This line renders the page with an error message.
+    }
+});
+
+// From lines 125 to 169, I asked ChatGPT how to create Express routes that let my EJS frontend create, update, and delete events by communicating with my Flask REST API.
+app.post("/events/create", async (req, res) => { // This line creates a POST route that runs when the user submits the add event form.
+    try { // This line starts a try block to handle possible errors.
+        const eventData = { // This line creates an object containing the event data from the form.
+            name: req.body.name, // This line gets the event name from the submitted form.
+            capacity: req.body.capacity, // This line gets the event capacity from the submitted form.
+            level: req.body.level, // This line gets the event level from the submitted form.
+            date: req.body.date // This line gets the event date from the submitted form.
+        };
+
+        await axios.post(`${API_BASE_URL}/events`, eventData); // This line sends the new event data to the Flask backend.
+        res.redirect("/events"); // This line sends the user back to the events page after the event is created.
+    } catch (error) { // This line catches any error that happens during the API request.
+        res.redirect("/events"); // This line sends the user back to the events page if something goes wrong.
+    }
+});
+
+app.post("/events/update", async (req, res) => { // This line creates a POST route that runs when the user submits an update event form.
+    try { // This line starts a try block to handle possible errors.
+        const eventId = req.body.event_id; // This line gets the hidden event id from the form so the backend knows which event to update.
+
+        const eventData = { // This line creates an object containing the updated event data.
+            name: req.body.name, // This line gets the updated event name from the form.
+            capacity: req.body.capacity, // This line gets the updated event capacity from the form.
+            level: req.body.level, // This line gets the updated event level from the form.
+            date: req.body.date // This line gets the updated event date from the form.
+        };
+
+        await axios.put(`${API_BASE_URL}/events/${eventId}`, eventData); // This line sends the updated event data to the Flask backend.
+        res.redirect("/events"); // This line sends the user back to the events page after updating.
+    } catch (error) { // This line catches any error that happens during the update request.
+        res.redirect("/events"); // This line sends the user back to the events page if something goes wrong.
+    }
+});
+
+app.post("/events/delete", async (req, res) => { // This line creates a POST route that runs when the user clicks a delete button.
+    try { // This line starts a try block to handle possible errors.
+        const eventId = req.body.event_id; // This line gets the hidden event id from the form.
+
+        await axios.delete(`${API_BASE_URL}/events/${eventId}`); // This line sends a delete request to the Flask backend for the selected event.
+        res.redirect("/events"); // This line sends the user back to the events page after deleting.
+    } catch (error) { // This line catches any error that happens during the delete request.
+        res.redirect("/events"); // This line sends the user back to the events page if something goes wrong.
     }
 });
 

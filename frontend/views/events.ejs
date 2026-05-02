@@ -1,0 +1,112 @@
+<!-- From lines 3 to 112, I asked ChatGPT how to create an EJS page that lets users view, add, update, and delete VIP events without showing database primary key IDs. -->
+
+<%- include("layout/header") %> <!-- This line inserts the reusable header and navigation onto the page. -->
+
+<section class="card"> <!-- This line creates a card section for the events page heading. -->
+    <h2>Events</h2> <!-- This line displays the events page title. -->
+    <p>Use this page to manage VIP organization events.</p> <!-- This line explains what the page is used for. -->
+</section> <!-- This line ends the heading card. -->
+
+<% if (typeof error !== "undefined") { %> <!-- This line checks if an error message was sent from server.js. -->
+    <div class="error-message"> <!-- This line creates a styled error message box. -->
+        <%= error %> <!-- This line displays the error message. -->
+    </div> <!-- This line ends the error message box. -->
+<% } %> <!-- This line ends the error check. -->
+
+<section class="card"> <!-- This line creates a card section for adding a new event. -->
+    <h2>Add New Event</h2> <!-- This line displays the form title. -->
+
+    <form action="/events/create" method="POST" class="form-grid"> <!-- This line creates a form that sends new event data to the Express route. -->
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="name">Event Name</label> <!-- This line labels the event name input. -->
+            <input type="text" id="name" name="name" required> <!-- This line creates a required text box for the event name. -->
+        </div> <!-- This line ends the event name field group. -->
+
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="capacity">Capacity</label> <!-- This line labels the capacity input. -->
+            <input type="number" id="capacity" name="capacity" min="1" required> <!-- This line creates a required number box for event capacity. -->
+        </div> <!-- This line ends the capacity field group. -->
+
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="level">Event Level</label> <!-- This line labels the event level dropdown. -->
+            <select id="level" name="level" required> <!-- This line creates a dropdown so users do not have to type the event level manually. -->
+                <option value="Bronze">Bronze</option> <!-- This line creates a Bronze option. -->
+                <option value="Silver">Silver</option> <!-- This line creates a Silver option. -->
+                <option value="Gold">Gold</option> <!-- This line creates a Gold option. -->
+            </select> <!-- This line ends the event level dropdown. -->
+        </div> <!-- This line ends the event level field group. -->
+
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="date">Date</label> <!-- This line labels the date input. -->
+            <input type="date" id="date" name="date" required> <!-- This line creates a required date picker for the event date. -->
+        </div> <!-- This line ends the date field group. -->
+
+        <button type="submit" class="button">Add Event</button> <!-- This line creates the submit button for adding an event. -->
+    </form> <!-- This line ends the add event form. -->
+</section> <!-- This line ends the add event card. -->
+
+<section class="card"> <!-- This line creates a card section for the current events list. -->
+    <h2>Current Events</h2> <!-- This line displays the current events heading. -->
+
+    <% if (events.length === 0) { %> <!-- This line checks if there are no events to display. -->
+        <p>No events found.</p> <!-- This line displays a message if the events list is empty. -->
+    <% } else { %> <!-- This line runs if there are events to display. -->
+        <div class="table-wrapper"> <!-- This line creates a wrapper around the table for styling. -->
+            <table> <!-- This line starts the events table. -->
+                <thead> <!-- This line starts the table header area. -->
+                    <tr> <!-- This line starts the header row. -->
+                        <th>Event Name</th> <!-- This line creates a column for event names. -->
+                        <th>Capacity</th> <!-- This line creates a column for event capacity. -->
+                        <th>Level</th> <!-- This line creates a column for event levels. -->
+                        <th>Date</th> <!-- This line creates a column for event dates. -->
+                        <th>Update</th> <!-- This line creates a column for update buttons. -->
+                        <th>Delete</th> <!-- This line creates a column for delete buttons. -->
+                    </tr> <!-- This line ends the header row. -->
+                </thead> <!-- This line ends the table header area. -->
+
+                <tbody> <!-- This line starts the table body area. -->
+                    <% events.forEach(event => { %> <!-- This line loops through each event from the backend. -->
+                        <tr> <!-- This line starts a table row for one event. -->
+                            <form action="/events/update" method="POST"> <!-- This line creates an update form for this event. -->
+                                <input type="hidden" name="event_id" value="<%= event.id %>"> <!-- This hidden input stores the database id without showing it on the page. -->
+
+                                <td> <!-- This line starts the event name table cell. -->
+                                    <input type="text" name="name" value="<%= event.name %>" required> <!-- This line allows the user to edit the event name. -->
+                                </td> <!-- This line ends the event name table cell. -->
+
+                                <td> <!-- This line starts the capacity table cell. -->
+                                    <input type="number" name="capacity" min="1" value="<%= event.capacity %>" required> <!-- This line allows the user to edit the event capacity. -->
+                                </td> <!-- This line ends the capacity table cell. -->
+
+                                <td> <!-- This line starts the level table cell. -->
+                                    <select name="level" required> <!-- This line creates a dropdown for editing the event level. -->
+                                        <option value="Bronze" <%= event.level === "Bronze" ? "selected" : "" %>>Bronze</option> <!-- This line selects Bronze if the event is Bronze. -->
+                                        <option value="Silver" <%= event.level === "Silver" ? "selected" : "" %>>Silver</option> <!-- This line selects Silver if the event is Silver. -->
+                                        <option value="Gold" <%= event.level === "Gold" ? "selected" : "" %>>Gold</option> <!-- This line selects Gold if the event is Gold. -->
+                                    </select> <!-- This line ends the level dropdown. -->
+                                </td> <!-- This line ends the level table cell. -->
+
+                                <td> <!-- This line starts the date table cell. -->
+                                    <input type="date" name="date" value="<%= event.formattedDate %>" required> <!-- This line allows the user to edit the event date using the correctly formatted date value. -->
+                                </td> <!-- This line ends the date table cell. -->
+
+                                <td> <!-- This line starts the update table cell. -->
+                                    <button type="submit" class="button small-button">Update</button> <!-- This line creates the update button for this event. -->
+                                </td> <!-- This line ends the update table cell. -->
+                            </form> <!-- This line ends the update form. -->
+
+                            <td> <!-- This line starts the delete table cell. -->
+                                <form action="/events/delete" method="POST"> <!-- This line creates a delete form for this event. -->
+                                    <input type="hidden" name="event_id" value="<%= event.id %>"> <!-- This hidden input stores the database id without showing it on the page. -->
+                                    <button type="submit" class="button danger-button small-button">Delete</button> <!-- This line creates the delete button for this event. -->
+                                </form> <!-- This line ends the delete form. -->
+                            </td> <!-- This line ends the delete table cell. -->
+                        </tr> <!-- This line ends the event row. -->
+                    <% }) %> <!-- This line ends the events loop. -->
+                </tbody> <!-- This line ends the table body area. -->
+            </table> <!-- This line ends the events table. -->
+        </div> <!-- This line ends the table wrapper. -->
+    <% } %> <!-- This line ends the events list check. -->
+</section> <!-- This line ends the current events card. -->
+
+<%- include("layout/footer") %> <!-- This line inserts the reusable footer onto the page. -->
