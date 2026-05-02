@@ -1,0 +1,112 @@
+<!-- From lines 3 to 112 , I asked ChatGPT how to create an EJS page that lets users register members for events using dropdowns and view registered members by event without showing database primary key IDs. -->
+
+<%- include("layout/header") %> <!-- This line inserts the reusable header and navigation onto the page. -->
+
+<section class="card"> <!-- This line creates a card section for the registrations page heading. -->
+    <h2>Registrations</h2> <!-- This line displays the registrations page title. -->
+    <p>Use this page to register members for events and view event attendance.</p> <!-- This line explains what the page is used for. -->
+</section> <!-- This line ends the heading card. -->
+
+<% if (typeof error !== "undefined") { %> <!-- This line checks if an error message was sent from server.js. -->
+    <div class="error-message"> <!-- This line creates a styled error message box. -->
+        <%= error %> <!-- This line displays the error message. -->
+    </div> <!-- This line ends the error message box. -->
+<% } %> <!-- This line ends the error check. -->
+
+<section class="card"> <!-- This line creates a card section for adding a new registration. -->
+    <h2>Register Member for Event</h2> <!-- This line displays the form title. -->
+
+    <form action="/registrations/create" method="POST" class="form-grid"> <!-- This line creates a form that sends new registration data to the Express route. -->
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="member_id">Member</label> <!-- This line labels the member dropdown. -->
+            <select id="member_id" name="member_id" required> <!-- This line creates a dropdown for selecting a member without typing the name. -->
+                <% members.forEach(member => { %> <!-- This line loops through each member. -->
+                    <option value="<%= member.id %>"><%= member.name %> - <%= member.level %></option> <!-- This line displays the member name and level while storing the id as the hidden value. -->
+                <% }) %> <!-- This line ends the members loop. -->
+            </select> <!-- This line ends the member dropdown. -->
+        </div> <!-- This line ends the member field group. -->
+
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="event_id">Event</label> <!-- This line labels the event dropdown. -->
+            <select id="event_id" name="event_id" required> <!-- This line creates a dropdown for selecting an event without typing the event name. -->
+                <% events.forEach(event => { %> <!-- This line loops through each event. -->
+                    <option value="<%= event.id %>"><%= event.name %> - <%= event.level %></option> <!-- This line displays the event name and level while storing the id as the hidden value. -->
+                <% }) %> <!-- This line ends the events loop. -->
+            </select> <!-- This line ends the event dropdown. -->
+        </div> <!-- This line ends the event field group. -->
+
+        <button type="submit" class="button">Create Registration</button> <!-- This line creates the submit button for registering a member. -->
+    </form> <!-- This line ends the add registration form. -->
+</section> <!-- This line ends the add registration card. -->
+
+<section class="card"> <!-- This line creates a card section for current registrations. -->
+    <h2>Current Registrations</h2> <!-- This line displays the current registrations heading. -->
+
+    <% if (registrations.length === 0) { %> <!-- This line checks if there are no registrations to display. -->
+        <p>No registrations found.</p> <!-- This line displays a message if the registrations list is empty. -->
+    <% } else { %> <!-- This line runs if there are registrations to display. -->
+        <div class="table-wrapper"> <!-- This line creates a wrapper around the table for styling. -->
+            <table> <!-- This line starts the registrations table. -->
+                <thead> <!-- This line starts the table header area. -->
+                    <tr> <!-- This line starts the header row. -->
+                        <th>Member</th> <!-- This line creates a column for member names. -->
+                        <th>Event</th> <!-- This line creates a column for event names. -->
+                        <th>Event Level</th> <!-- This line creates a column for event levels. -->
+                        <th>Event Date</th> <!-- This line creates a column for event dates. -->
+                        <th>Delete</th> <!-- This line creates a column for delete buttons. -->
+                    </tr> <!-- This line ends the header row. -->
+                </thead> <!-- This line ends the table header area. -->
+
+                <tbody> <!-- This line starts the table body area. -->
+                    <% registrations.forEach(registration => { %> <!-- This line loops through each registration. -->
+                        <tr> <!-- This line starts one registration row. -->
+                            <td><%= registration.memberName %></td> <!-- This line displays the member name without showing the database id. -->
+                            <td><%= registration.eventName %></td> <!-- This line displays the event name without showing the database id. -->
+                            <td><%= registration.eventLevel %></td> <!-- This line displays the event level. -->
+                            <td><%= registration.eventDate %></td> <!-- This line displays the formatted event date. -->
+                            <td> <!-- This line starts the delete table cell. -->
+                                <form action="/registrations/delete" method="POST"> <!-- This line creates a delete form for this registration. -->
+                                    <input type="hidden" name="registration_id" value="<%= registration.id %>"> <!-- This hidden input stores the registration id without showing it on the page. -->
+                                    <button type="submit" class="button danger-button small-button">Delete</button> <!-- This line creates the delete button for this registration. -->
+                                </form> <!-- This line ends the delete form. -->
+                            </td> <!-- This line ends the delete table cell. -->
+                        </tr> <!-- This line ends one registration row. -->
+                    <% }) %> <!-- This line ends the registrations loop. -->
+                </tbody> <!-- This line ends the table body area. -->
+            </table> <!-- This line ends the registrations table. -->
+        </div> <!-- This line ends the table wrapper. -->
+    <% } %> <!-- This line ends the registrations list check. -->
+</section> <!-- This line ends the current registrations card. -->
+
+<section class="card"> <!-- This line creates a card section for viewing registered members by event. -->
+    <h2>View Members Registered for an Event</h2> <!-- This line displays the section heading. -->
+
+    <form action="/registrations" method="GET" class="form-grid"> <!-- This line creates a GET form that reloads the page with the selected event. -->
+        <div class="form-group"> <!-- This line creates a form field group. -->
+            <label for="selected_event">Select Event</label> <!-- This line labels the event selection dropdown. -->
+            <select id="selected_event" name="event_id" required> <!-- This line creates a dropdown for selecting an event. -->
+                <% events.forEach(event => { %> <!-- This line loops through each event. -->
+                    <option value="<%= event.id %>" <%= selectedEventId == event.id ? "selected" : "" %>><%= event.name %> - <%= event.level %></option> <!-- This line displays the event name and keeps the selected event chosen. -->
+                <% }) %> <!-- This line ends the events loop. -->
+            </select> <!-- This line ends the event dropdown. -->
+        </div> <!-- This line ends the form field group. -->
+
+        <button type="submit" class="button">View Registered Members</button> <!-- This line creates the button to view members for the selected event. -->
+    </form> <!-- This line ends the selected event form. -->
+
+    <% if (selectedEventName) { %> <!-- This line checks if an event has been selected. -->
+        <h3 class="section-subtitle">Registered Members for <%= selectedEventName %></h3> <!-- This line displays the selected event name. -->
+
+        <% if (selectedEventMembers.length === 0) { %> <!-- This line checks if no members are registered for the selected event. -->
+            <p>No members are registered for this event.</p> <!-- This line displays a message when the selected event has no members. -->
+        <% } else { %> <!-- This line runs if the selected event has registered members. -->
+            <ul class="member-list"> <!-- This line starts a styled list of registered members. -->
+                <% selectedEventMembers.forEach(member => { %> <!-- This line loops through each registered member. -->
+                    <li><%= member.name %> - <%= member.level %></li> <!-- This line displays the member name and level without showing the database id. -->
+                <% }) %> <!-- This line ends the selected event members loop. -->
+            </ul> <!-- This line ends the registered members list. -->
+        <% } %> <!-- This line ends the selected event members check. -->
+    <% } %> <!-- This line ends the selected event check. -->
+</section> <!-- This line ends the registered members by event card. -->
+
+<%- include("layout/footer") %> <!-- This line inserts the reusable footer onto the page. -->

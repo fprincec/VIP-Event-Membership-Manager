@@ -186,3 +186,21 @@ th { /* This selector styles table header cells. */
 td input, td select { /* This selector styles inputs and dropdowns inside table cells. */
     width: 100%; /* This line makes table form fields fill their cell. */
 }
+
+/* From lines 191 to 206, I asked ChatGPT how to style the registered members list on the Sprint 2 registrations page. */
+.section-subtitle { /* This selector styles smaller section headings inside cards. */
+    margin-top: 20px; /* This line adds space above the subtitle. */
+    margin-bottom: 10px; /* This line adds space below the subtitle. */
+    color: #0f4c5c; /* This line makes the subtitle dark teal. */
+}
+
+.member-list { /* This selector styles the list of registered members for a selected event. */
+    list-style-position: inside; /* This line keeps the list bullets inside the card area. */
+    padding: 10px; /* This line adds space inside the list area. */
+    background-color: #f4f6f8; /* This line gives the list a light background. */
+    border-radius: 8px; /* This line rounds the list box corners. */
+}
+
+.member-list li { /* This selector styles each registered member list item. */
+    padding: 6px 0; /* This line adds spacing above and below each list item. */
+}

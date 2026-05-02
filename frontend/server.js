@@ -1,4 +1,4 @@
-// From lines 2 to 60, 94 to 101, and 171 to 189, I asked ChatGPT how to create an Express and EJS frontend server that connects to my Flask REST API.
+// From lines 2 to 60, 94 to 101, I asked ChatGPT how to create an Express and EJS frontend server that connects to my Flask REST API.
 
 const express = require("express"); // This line imports Express, which is used to create the frontend web server.
 const path = require("path"); // This line imports the path module, which helps build safe file paths.
@@ -168,19 +168,85 @@ app.post("/events/delete", async (req, res) => { // This line creates a POST rou
     }
 });
 
+// From lines 173 to 229, I asked ChatGPT how to create a registration page route that loads members, events, registrations, and selected event members from my Flask API.
 app.get("/registrations", async (req, res) => { // This line creates a GET route for the registrations page.
     try { // This line starts a try block to handle possible API errors.
-        const membersResponse = await axios.get(`${API_BASE_URL}/members`); // This line requests all members for the registration dropdown.
-        const eventsResponse = await axios.get(`${API_BASE_URL}/events`); // This line requests all events for the registration dropdown.
+        const selectedEventId = req.query.event_id; // This line gets the selected event id from the page URL if the user selected an event.
+
+        const membersResponse = await axios.get(`${API_BASE_URL}/members`); // This line requests all members for the member dropdown.
+        const eventsResponse = await axios.get(`${API_BASE_URL}/events`); // This line requests all events for the event dropdown.
         const registrationsResponse = await axios.get(`${API_BASE_URL}/registrations`); // This line requests all registrations from the backend.
 
-        res.render("registrations", { // This line renders registrations.ejs and sends all needed data.
-            members: membersResponse.data, // This line sends members to the registration page.
-            events: eventsResponse.data, // This line sends events to the registration page.
-            registrations: registrationsResponse.data // This line sends registrations to the registration page.
+        const members = membersResponse.data; // This line stores the members list in a variable.
+        const events = eventsResponse.data; // This line stores the events list in a variable.
+        const registrations = registrationsResponse.data.map(registration => { // This line loops through registrations and adds readable member and event names.
+            const member = members.find(member => member.id === registration.member_id); // This line finds the member connected to the registration.
+            const event = events.find(event => event.id === registration.event_id); // This line finds the event connected to the registration.
+
+            return { // This line returns a cleaned registration object for the page.
+                id: registration.id, // This line keeps the registration id for hidden form actions only.
+                memberName: member ? member.name : "Unknown Member", // This line stores the member name for display.
+                eventName: event ? event.name : "Unknown Event", // This line stores the event name for display.
+                eventLevel: event ? event.level : "Unknown", // This line stores the event level for display.
+                eventDate: event ? formatDateForInput(event.date) : "" // This line stores the formatted event date for display.
+            };
         });
-    } catch (error) { // This line catches errors if any registration data cannot be loaded.
-        res.render("registrations", { members: [], events: [], registrations: [], error: "Could not load registration data from the backend." }); // This line renders the page with empty lists and an error.
+
+        let selectedEventMembers = []; // This line creates an empty list for members registered for the selected event.
+        let selectedEventName = ""; // This line creates an empty variable for the selected event name.
+
+        if (selectedEventId) { // This line checks if the user selected an event.
+            const selectedEvent = events.find(event => event.id == selectedEventId); // This line finds the selected event in the events list.
+            selectedEventName = selectedEvent ? selectedEvent.name : ""; // This line stores the selected event name if it exists.
+
+            const eventMembersResponse = await axios.get(`${API_BASE_URL}/events/${selectedEventId}/members`); // This line requests members registered for the selected event.
+            selectedEventMembers = eventMembersResponse.data; // This line stores the selected event members from the backend.
+        }
+
+        res.render("registrations", { // This line renders the registrations.ejs page.
+            members: members, // This line sends all members to the page.
+            events: events, // This line sends all events to the page.
+            registrations: registrations, // This line sends readable registrations to the page.
+            selectedEventId: selectedEventId, // This line sends the selected event id for the dropdown.
+            selectedEventName: selectedEventName, // This line sends the selected event name for the heading.
+            selectedEventMembers: selectedEventMembers // This line sends the members registered for the selected event.
+        });
+    } catch (error) { // This line catches errors if registration data cannot be loaded.
+        res.render("registrations", { // This line still renders the page if there is an error.
+            members: [], // This line sends an empty members list.
+            events: [], // This line sends an empty events list.
+            registrations: [], // This line sends an empty registrations list.
+            selectedEventId: "", // This line sends an empty selected event id.
+            selectedEventName: "", // This line sends an empty selected event name.
+            selectedEventMembers: [], // This line sends an empty selected event members list.
+            error: "Could not load registration data from the backend." // This line sends an error message to the page.
+        });
+    }
+});
+
+// From lines 228 to 255, I asked ChatGPT how to create Express routes that let my EJS frontend create and delete registrations by communicating with my Flask REST API.
+app.post("/registrations/create", async (req, res) => { // This line creates a POST route that runs when the user submits the add registration form.
+    try { // This line starts a try block to handle possible errors.
+        const registrationData = { // This line creates an object containing the registration data from the form.
+            event_id: req.body.event_id, // This line gets the selected event id from the event dropdown.
+            member_id: req.body.member_id // This line gets the selected member id from the member dropdown.
+        };
+
+        await axios.post(`${API_BASE_URL}/registrations`, registrationData); // This line sends the new registration data to the Flask backend.
+        res.redirect("/registrations"); // This line sends the user back to the registrations page after creating the registration.
+    } catch (error) { // This line catches any error that happens during the API request.
+        res.redirect("/registrations"); // This line sends the user back to the registrations page if something goes wrong.
+    }
+});
+
+app.post("/registrations/delete", async (req, res) => { // This line creates a POST route that runs when the user clicks a delete registration button.
+    try { // This line starts a try block to handle possible errors.
+        const registrationId = req.body.registration_id; // This line gets the hidden registration id from the form.
+
+        await axios.delete(`${API_BASE_URL}/registrations/${registrationId}`); // This line sends a delete request to the Flask backend for the selected registration.
+        res.redirect("/registrations"); // This line sends the user back to the registrations page after deleting.
+    } catch (error) { // This line catches any error that happens during the delete request.
+        res.redirect("/registrations"); // This line sends the user back to the registrations page if something goes wrong.
     }
 });
 
